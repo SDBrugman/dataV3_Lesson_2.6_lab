@@ -72,8 +72,10 @@ SELECT customer_id, email, active
 FROM customer
 WHERE active = 0;
 
+drop table if exists deleted_users;
+
 CREATE TABLE deleted_users (
-	customer_id int(11) DEFAULT NULL,
+	customer_id int(11) UNIQUE NOT NULL,
     email varchar(50) DEFAULT NULL,
     date int(11)
     #constraint foreign key(customer_id) references customer(customer_id)
@@ -107,6 +109,12 @@ SELECT customer_id, active
 FROM customer
 WHERE active = 0;
 
-#DELETE FROM customer WHERE active = 0;
+/*Run this code before deleting - the problem was that other tables were using the cistomer_id as foreign key
+so we needed to allow deleting that'*/
+
+alter table payment add CONSTRAINT `f_payment_customer` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE;
+alter table rental add CONSTRAINT `f_rental_customer` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE;
+
+#DELETE FROM customer WHERE active = 0; -- gives error using safe update mode
 DELETE FROM customer 
 WHERE (customer_id) IN (16,64,124,169,241,271,315,368,406,446,482,510,534,558,592);
